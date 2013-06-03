@@ -16,9 +16,14 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with ZeitLinse.  If not, see <http://www.gnu.org/licenses/>.
 
-{-# LANGUAGE ExistentialQuantification, GeneralizedNewtypeDeriving,
-             FlexibleInstances, DeriveFunctor, StandaloneDeriving #-}
--- module ZeitLinse where
+{-# LANGUAGE
+    DeriveFunctor,
+    ExistentialQuantification,
+    FlexibleInstances,
+    GeneralizedNewtypeDeriving,
+    OverlappingInstances,
+    StandaloneDeriving #-}
+module ZeitLinse where
 
 import Prelude hiding (minimum, foldr)
 import Control.Arrow ((***), (&&&))
@@ -96,11 +101,17 @@ instance MergeableWeighted TimedScore where
 instance MergeableWeighted (TimeSpot a) where
   -- just take the item with the highest relative timedScore
   -- FIXME: should merge the ratings
-  mergeWeighted = _unweightedItem . maximumBy betterRated
-    where betterRated a b = compare (weightedTimedScore a)
-                                    (weightedTimedScore b)
-          weightedTimedScore (Weighted w timespot) =
-            applyWeight' w (_score . _timedScore $ timespot)
+  mergeWeighted ts = TimeSpot (mergedScore ts) (bestFocalItem ts)
+    where
+      bestFocalItem = mergeWeighted . fmap (fmap _focalItem)
+      mergedScore = mergeWeighted . fmap (fmap _timedScore)
+
+instance MergeableWeighted b where
+  mergeWeighted = genericMergeWeighted
+
+-- genericMergeWeighted :: (Foldable f) => f a -> a
+genericMergeWeighted = _unweightedItem . maximumBy compareWeight
+  where compareWeight = curry $ uncurry compare . (_weight *** _weight)
 
 
 -- Helpers and Utillities
