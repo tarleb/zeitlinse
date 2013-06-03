@@ -85,6 +85,10 @@ applyWeight' w a = (realToFrac . fromWeight $ w) * a
 --
 -- Various Mergeable instances
 --
+submergeWeighted :: forall a b. (MergeableWeighted a, MergeableWeighted b) =>
+                    (a -> b) -> [Weighted a] -> b
+submergeWeighted f = mergeWeighted . fmap (fmap f)
+
 instance MergeableWeighted Score where
   mergeWeighted = mean . fmap applyWeight
 
@@ -93,18 +97,18 @@ instance MergeableWeighted SubmissionTime where
 
 instance MergeableWeighted TimedScore where
   -- we merge time and scores independently for now.
-  mergeWeighted rs = TimedScore mergedScore time
-    where mergedScore = mergeWeightedOn _score rs
-          time = mergeWeightedOn _time rs
-          mergeWeightedOn f = mergeWeighted . fmap (fmap f)
+  mergeWeighted rs = TimedScore (mergeScores rs) (mergeTime rs)
+    where
+      mergeScores = submergeWeighted _score
+      mergeTime   = submergeWeighted _time
 
 instance MergeableWeighted (TimeSpot a) where
   -- just take the item with the highest relative timedScore
   -- FIXME: should merge the ratings
-  mergeWeighted ts = TimeSpot (mergedScore ts) (bestFocalItem ts)
+  mergeWeighted ts = TimeSpot mergedScore bestFocalItem
     where
-      bestFocalItem = mergeWeighted . fmap (fmap _focalItem)
-      mergedScore = mergeWeighted . fmap (fmap _timedScore)
+      bestFocalItem = submergeWeighted _focalItem  ts
+      mergedScore   = submergeWeighted _timedScore ts
 
 instance MergeableWeighted b where
   mergeWeighted = genericMergeWeighted
