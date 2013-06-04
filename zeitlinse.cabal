@@ -1,0 +1,35 @@
+name:                zeitlinse
+version:             0.0.0.1
+synopsis:            Merge ratings from multiple sources
+homepage:            https://github.com/tarleb/zeitlinse
+license:             AGPLv3
+license-file:        COPYING
+author:              Albert Krewinkel
+maintainer:          Albert Krewinkel <tarleb@moltkeplatz.de>
+copyright:           (c) 2013 Albert Krewinkel
+build-type:          Simple
+description:
+                     Focus your time on the important things.  ZeitLinse will
+                     help you to combine your multiple sources in a way that
+                     reflects your personal preferences.
+
+extra-source-files:  README.md
+
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+
+  exposed-modules:     ZeitLinse
+  other-modules:
+
+  default-language:    Haskell2010
+  other-extensions:    DeriveFunctor,
+                       ExistentialQuantification,
+                       FlexibleInstances,
+                       GeneralizedNewtypeDeriving,
+                       OverlappingInstances,
+                       StandaloneDeriving
+
+  build-depends:       base >=4.5,
+                       containers >=0.4
