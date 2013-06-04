@@ -103,8 +103,8 @@ instance MergeableWeighted TimedScore where
       mergeTime   = submergeWeighted _time
 
 instance MergeableWeighted (TimeSpot a) where
-  -- just take the item with the highest relative timedScore
-  -- FIXME: should merge the ratings
+  -- just take the item with the highest weight and merge the scores into a
+  -- new score.
   mergeWeighted ts = TimeSpot mergedScore bestFocalItem
     where
       bestFocalItem = submergeWeighted _focalItem  ts
