@@ -28,6 +28,7 @@ module ZeitLinse where
 import Prelude hiding (minimum, foldr)
 import Control.Arrow ((***), (&&&))
 import Data.Foldable
+import Data.Traversable
 
 import qualified Data.Map as M
 
@@ -63,7 +64,7 @@ deriving instance Functor TimeSpot
 -- | Mergeable formalizes our need to combine multiple entities into one.
 --
 class MergeableWeighted a where
-  mergeWeighted :: [Weighted a] -> a
+  mergeWeighted :: Traversable f => f (Weighted a) -> a
 
 
 -- | Importance is relative and can be weighted.
@@ -85,9 +86,10 @@ applyWeight' w a = (realToFrac . fromWeight $ w) * a
 --
 -- Various Mergeable instances
 --
-submergeWeighted :: forall a b. (MergeableWeighted a, MergeableWeighted b) =>
-                    (a -> b) -> [Weighted a] -> b
-submergeWeighted f = mergeWeighted . fmap (fmap f)
+submergeWeighted :: forall a b t.
+                    (MergeableWeighted a, MergeableWeighted b, Traversable t) =>
+                    (a -> b) -> t (Weighted a) -> b
+submergeWeighted fn = mergeWeighted . fmap (fmap fn)
 
 instance MergeableWeighted Score where
   mergeWeighted = mean . fmap applyWeight
@@ -111,11 +113,8 @@ instance MergeableWeighted (TimeSpot a) where
       mergedScore   = submergeWeighted _timedScore ts
 
 instance MergeableWeighted b where
-  mergeWeighted = genericMergeWeighted
-
--- genericMergeWeighted :: (Foldable f) => f a -> a
-genericMergeWeighted = _unweightedItem . maximumBy compareWeight
-  where compareWeight = curry $ uncurry compare . (_weight *** _weight)
+  mergeWeighted = _unweightedItem . maximumBy compareWeight
+    where compareWeight = curry $ uncurry compare . (_weight *** _weight)
 
 
 -- Helpers and Utillities
