@@ -21,7 +21,8 @@ library
   hs-source-dirs:      src
 
   exposed-modules:     ZeitLinse
-  other-modules:
+  other-modules:       ZeitLinse.Core.TimeSpot
+                       ZeitLinse.Core.WeightedMerging
 
   default-language:    Haskell2010
   other-extensions:    DeriveFunctor,
