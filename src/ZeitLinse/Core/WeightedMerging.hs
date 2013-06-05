@@ -30,7 +30,7 @@ module ZeitLinse.Core.WeightedMerging
        , groupTimeSpots
        ) where
 
-import ZeitLinse.Core.TimeSpot
+import ZeitLinse.Core.Types
 
 import Prelude hiding (minimum, foldr)
 import Data.Foldable

@@ -22,7 +22,7 @@ module ZeitLinse.Core.Tests
 
 import Test.Hspec
 
-import ZeitLinse.Core.TimeSpot
+import ZeitLinse.Core.Types
 import ZeitLinse.Core.WeightedMerging
 
 tests :: Spec

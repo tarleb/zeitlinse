@@ -18,7 +18,7 @@
 
 {-# Language DeriveFunctor #-}
 {-# Language GeneralizedNewtypeDeriving #-}
-module ZeitLinse.Core.TimeSpot
+module ZeitLinse.Core.Types
        ( Score(..)
        , SubmissionTime(..)
        , TimedScore(..)

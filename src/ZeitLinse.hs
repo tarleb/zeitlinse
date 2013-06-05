@@ -18,7 +18,7 @@
 
 module ZeitLinse where
 
-import ZeitLinse.Core.TimeSpot
+import ZeitLinse.Core.Types
 import ZeitLinse.Core.WeightedMerging
 
 --

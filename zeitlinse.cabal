@@ -21,7 +21,7 @@ library
   hs-source-dirs:      src
 
   exposed-modules:      ZeitLinse
-                        ZeitLinse.Core.TimeSpot
+                        ZeitLinse.Core.Types
                         ZeitLinse.Core.WeightedMerging
 
   default-language:     Haskell2010
