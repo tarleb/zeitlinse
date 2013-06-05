@@ -25,15 +25,31 @@ import Test.Hspec
 import ZeitLinse.Core.Types
 import ZeitLinse.Core.WeightedMerging
 
+import Data.Foldable (toList)
+
+-- FIXME: These tests are horrible
 tests :: Spec
 tests = do
   describe "mergeWeighted" $ do
     it "merges scores to their mean" $
       mergeWeighted (constWeights 1 sampleScores) `shouldApproxEq` (Score 0.53)
+
     it "merges an empty list of scores to nan" $
       mergeWeighted ([] :: [Weighted Score]) `shouldSatisfy` isNaN . fromScore
 
+  describe "group TimeSpots" $ do
+    it "groups TimeSpots with the same focus items into a single group" $
+      groupTimeSpots equalTimeSpots `shouldSatisfy` ((== 1) . length . toList)
+
+    it "groups TimeSpots with different focus items into different groups" $
+      groupTimeSpots [ Weighted 0.8 sampleTimeSpot
+                     , Weighted 0.7 sampleTimeSpot
+                     , Weighted 0.5 sampleTimeSpot { _focalItem = "Moin" } ]
+      `shouldSatisfy` ((== 2) . length . toList)
+
   where
+    sampleTimeSpot = TimeSpot (TimedScore 0.5 $ SubmissionTime 1) "Hello"
+    equalTimeSpots = take 3 . repeat $ (Weighted 0.5 sampleTimeSpot)
     sampleScores = map Score [ 0.23, 0.9, 0.42, 0.63, 0, 1 ]
     constWeights c = map (Weighted c)
 

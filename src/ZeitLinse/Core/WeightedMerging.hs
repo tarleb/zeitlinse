@@ -101,3 +101,12 @@ instance MergeableWeighted b where
 mean :: (Foldable f, Fractional a) => f a -> a
 mean = uncurry (/) . foldr go (0,0)
   where go x (s,n) = (s+x, n+1)
+
+
+-- | Group TimeSpots with similar focal items together.
+groupTimeSpots :: (Foldable f, Ord a) =>
+                  f (Weighted (TimeSpot a)) -> [[Weighted (TimeSpot a)]]
+groupTimeSpots = M.elems . foldr step M.empty
+  where step a b = M.insertWith (++) (key a) [a] b
+        key = _focalItem . _unweightedItem
+
