@@ -30,10 +30,16 @@ tests = do
   describe "mergeWeighted" $ do
     it "merges scores to their mean" $
       mergeWeighted (constWeights 1 sampleScores) `shouldApproxEq` (Score 0.53)
+    it "merges an empty list of scores to nan" $
+      mergeWeighted ([] :: [Weighted Score]) `shouldSatisfy` isNaN . fromScore
+
   where
-    sampleScores = map Score [ 0.23 , 0.9 , 0.42 , 0.63 , 0 , 1]
+    sampleScores = map Score [ 0.23, 0.9, 0.42, 0.63, 0, 1 ]
     constWeights c = map (Weighted c)
 
+--
+-- Utilities
+--
 approx :: (Fractional a, Ord a) => a -> a -> Bool
 approx a = (<= 1E-15) . abs . (a -)
 

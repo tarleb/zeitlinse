@@ -27,14 +27,16 @@ module ZeitLinse.Core.WeightedMerging
          Weighted(..)
        , Weight(..)
        , MergeableWeighted(..)
+       , groupTimeSpots
        ) where
 
 import ZeitLinse.Core.TimeSpot
 
 import Prelude hiding (minimum, foldr)
-import Control.Arrow ((***))
 import Data.Foldable
+import Data.Function (on)
 import Data.Traversable
+import qualified Data.Map as M
 
 -- | Mergeable formalizes our need to combine multiple entities into one.
 class MergeableWeighted a where
@@ -55,11 +57,14 @@ newtype Weight = Weight { fromWeight :: Double }
 applyWeight :: Fractional a => Weighted a -> a
 applyWeight (Weighted w a) = applyWeight' w a
 
+applyWeight' :: Fractional a => Weight -> a -> a
 applyWeight' w a = (realToFrac . fromWeight $ w) * a
 
 --
 -- Various Mergeable instances
 --
+
+-- | Helper for recursive merging of data structures.
 submergeWeighted :: forall a b t.
                     (MergeableWeighted a, MergeableWeighted b, Traversable t) =>
                     (a -> b) -> t (Weighted a) -> b
@@ -87,8 +92,7 @@ instance MergeableWeighted (TimeSpot a) where
       mergedScore   = submergeWeighted _timedScore ts
 
 instance MergeableWeighted b where
-  mergeWeighted = _unweightedItem . maximumBy compareWeight
-    where compareWeight = curry $ uncurry compare . (_weight *** _weight)
+  mergeWeighted = _unweightedItem . maximumBy (compare `on` _weight)
 
 
 -- Helpers and Utillities
