@@ -2,7 +2,7 @@ name:                   zeitlinse
 version:                0.0.0.1
 synopsis:               Merge ratings from multiple sources
 homepage:               https://github.com/tarleb/zeitlinse
-license:                AGPLv3
+license:                AGPL-3
 license-file:           COPYING
 author:                 Albert Krewinkel
 maintainer:             Albert Krewinkel <tarleb@moltkeplatz.de>
@@ -18,7 +18,7 @@ extra-source-files:     README.md
 cabal-version:          >=1.10
 
 library
-  hs-source-dirs:      src
+  hs-source-dirs:       src
 
   exposed-modules:      ZeitLinse
                         ZeitLinse.Core.Types
