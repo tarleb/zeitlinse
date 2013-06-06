@@ -20,33 +20,6 @@ module ZeitLinse where
 
 import ZeitLinse.Core.Types
 import ZeitLinse.Core.WeightedMerging
+import ZeitLinse.FocalItems
 
---
--- Entries
---
-type Title = String
-newtype Resource = Resource String
-                 deriving (Eq, Ord, Show)
-
-data Article = Article Title Resource
-             deriving (Eq, Ord, Show)
-
--- -- ---------------------------------------------------------------------------
-
-sampleArticles = [ Article "Article 1" (Resource "justSomeResource")
-                 , Article "Article 2" (Resource "Hello, World!")
-                 , Article "Nice Things" (Resource "reddit.com")
-                 , Article "This is new" (Resource "NY times")
-                 ]
-
-sampleScores = map Score [ 0.23 , 0.9 , 0.42 , 0.63 , 0 , 1]
-sampleSubmissionTimes = map SubmissionTime [ 5 , 46 , 71 , 36]
-sampleTimedScores = zipWith TimedScore sampleScores sampleSubmissionTimes
-sampleTimeSpots = zipWith (TimeSpot) sampleTimedScores sampleArticles
-
-main = do
-  print . mergeWeighted $
-    zipWith Weighted
-            [0.7, 0.68, 0.98, 0.2, 0.13, 0.65]
-            sampleTimeSpots
-                         
+main = print "Sorry, this doesn't work yet."
