@@ -22,8 +22,7 @@ module ZeitLinse.Core.Tests
 
 import Test.Hspec
 
-import ZeitLinse.Core.Types
-import ZeitLinse.Core.WeightedMerging
+import ZeitLinse.Core
 
 import Data.Foldable (toList)
 
@@ -46,9 +45,15 @@ tests = do
                      , Weighted 0.7 sampleTimeSpot
                      , Weighted 0.5 sampleTimeSpot { _focalItem = "Moin" } ]
       `shouldSatisfy` ((== 2) . length . toList)
+  describe "zeitScore" $ do
+    it "gives decreasing scores over time" $
+      zeitScore sampleTimedScore (read "2013-08-03 12:00:00") `shouldSatisfy`
+        (_score sampleTimedScore >=)
 
   where
-    sampleTimeSpot = TimeSpot (TimedScore 0.5 $ SubmissionTime 1) "Hello"
+    sampleTimedScore = TimedScore 0.5 . SubmissionTime . read $
+                       "2013-08-03 12:00:00 UTC"
+    sampleTimeSpot = TimeSpot sampleTimedScore "Hello"
     equalTimeSpots = take 3 . repeat $ (Weighted 0.5 sampleTimeSpot)
     sampleScores = map Score [ 0.23, 0.9, 0.42, 0.63, 0, 1 ]
     constWeights c = map (Weighted c)

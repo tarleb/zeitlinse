@@ -28,6 +28,7 @@ module ZeitLinse.Core.WeightedMerging
        , Weight(..)
        , MergeableWeighted(..)
        , groupTimeSpots
+       , applyWeight
        ) where
 
 import ZeitLinse.Core.Types
@@ -54,11 +55,11 @@ newtype Weight = Weight { fromWeight :: Double }
                deriving (Eq, Num, Fractional, Ord, Show)
 
 -- Treat weighted items like scaled vectors
-applyWeight :: Fractional a => Weighted a -> a
-applyWeight (Weighted w a) = applyWeight' w a
+applyWeight' :: Fractional a => Weighted a -> a
+applyWeight' (Weighted w a) = applyWeight w a
 
-applyWeight' :: Fractional a => Weight -> a -> a
-applyWeight' w a = (realToFrac . fromWeight $ w) * a
+applyWeight :: Fractional a => Weight -> a -> a
+applyWeight w a = (realToFrac . fromWeight $ w) * a
 
 --
 -- Various Mergeable instances
@@ -71,7 +72,7 @@ submergeWeighted :: forall a b t.
 submergeWeighted fn = mergeWeighted . fmap (fmap fn)
 
 instance MergeableWeighted Score where
-  mergeWeighted = mean . fmap applyWeight
+  mergeWeighted = mean . fmap applyWeight'
 
 instance MergeableWeighted SubmissionTime where
   mergeWeighted = minimum . fmap _unweightedItem

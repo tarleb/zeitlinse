@@ -25,6 +25,10 @@ module ZeitLinse.Core.Types
        , TimeSpot(..)
        ) where
 
+import Data.Time.Clock
+import Data.Time.LocalTime()
+import Data.Time.Format
+
 -- The point of time lenses is to rate the importance of an item based on how
 -- high other sources rank the item.
 
@@ -32,9 +36,9 @@ module ZeitLinse.Core.Types
 newtype Score = Score { fromScore   :: Double }
               deriving (Eq, Floating, Fractional, Num, Ord, Show)
 
--- | The time at which an entry was submitted.
-newtype SubmissionTime = SubmissionTime { fromSubmissionTime :: Integer }
-                       deriving (Eq, Ord, Show)
+-- | The time at wich an entry was submitted.
+newtype SubmissionTime = SubmissionTime { fromSubmissionTime :: UTCTime }
+                       deriving (Eq, Ord, Read, ParseTime, FormatTime, Show)
 
 -- | A timedScore is a score and the time at which the score was given.
 data TimedScore = TimedScore
