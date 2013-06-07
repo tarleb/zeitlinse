@@ -24,6 +24,7 @@ import Test.Hspec
 
 import ZeitLinse.Core.Types
 import ZeitLinse.Core.WeightedMerging
+import ZeitLinse.Core.ZeitScore
 
 import Data.Foldable (toList)
 
