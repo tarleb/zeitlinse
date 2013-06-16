@@ -21,10 +21,14 @@ module ZeitLinse.Core.Tests
        ) where
 
 import Test.Hspec
+import Test.QuickCheck
 
 import ZeitLinse.Core
 
+import Control.Applicative ((<$>), (<*>))
 import Data.Foldable (toList)
+import Data.Time.Clock
+import Data.Time.Calendar
 
 -- FIXME: These tests are horrible
 tests :: Spec
@@ -47,8 +51,8 @@ tests = do
       `shouldSatisfy` ((== 2) . length . toList)
   describe "zeitScore" $ do
     it "gives decreasing scores over time" $
-      zeitScore sampleTimedScore (read "2013-08-03 12:00:00") `shouldSatisfy`
-        (_score sampleTimedScore >=)
+      quickCheck (prop_zeitScore_decreases_with_time sampleTimedScore)
+
 
   where
     sampleTimedScore = TimedScore 0.5 . SubmissionTime . read $
@@ -66,3 +70,26 @@ approx a = (<= 1E-15) . abs . (a -)
 
 shouldApproxEq :: (Fractional a, Ord a, Show a) => a -> a -> Expectation
 shouldApproxEq actual expected = actual `shouldSatisfy` (approx expected)
+
+--
+-- QuickCheck
+--
+
+instance Arbitrary Day where
+    arbitrary = ModifiedJulianDay <$> arbitrary
+
+instance Arbitrary DiffTime where
+    arbitrary = secondsToDiffTime <$> arbitrary
+
+instance Arbitrary UTCTime where
+    arbitrary = UTCTime <$> arbitrary <*> arbitrary
+
+instance Arbitrary NominalDiffTime where
+    arbitrary = (fromRational . toRational) <$> (arbitrary :: Gen Double)
+
+prop_zeitScore_decreases_with_time :: TimedScore -> NominalDiffTime -> Property
+prop_zeitScore_decreases_with_time timedScore time =
+    time >= 0 ==>
+         zeitScore timedScore afterSubmissionUTCTime <= (_score timedScore)
+    where submissionUTCTime = fromSubmissionTime . _time $ timedScore
+          afterSubmissionUTCTime = time `addUTCTime` submissionUTCTime
