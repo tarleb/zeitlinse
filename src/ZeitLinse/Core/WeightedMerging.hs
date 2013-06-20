@@ -40,12 +40,13 @@ import Prelude hiding (minimum, foldr)
 import Control.Lens
 import Data.Foldable
 import Data.Function (on)
+import Data.Semigroup
 import Data.Traversable
 import qualified Data.Map as M
 
 -- | Mergeable formalizes our need to combine multiple entities into one.
 class MergeableWeighted a where
-  mergeWeighted  :: Traversable f => f (Weighted a) -> a
+  mergeWeighted  :: Traversable t => t (Weighted a) -> a
 
 -- | A weight can be any real number, but will usually be in the interval [-1,1]
 newtype Weight = Weight { fromWeight :: Double }
@@ -60,6 +61,10 @@ data Weighted a =
 
 makeLenses ''Weighted
 
+-- | Combine weighting information
+instance Semigroup a => Semigroup (Weighted a) where
+  (Weighted v a) <> (Weighted w b) = Weighted (v + w) (a <> b)
+
 -- Treat weighted items like scaled vectors
 applyWeight' :: Fractional a => Weighted a -> a
 applyWeight' (Weighted w a) = applyWeight w a
@@ -73,7 +78,9 @@ applyWeight w a = (realToFrac . fromWeight $ w) * a
 
 -- | Helper for recursive merging of data structures.
 submergeWeighted :: forall a b t.
-                    (MergeableWeighted a, MergeableWeighted b, Traversable t) =>
+                    ( MergeableWeighted a
+                    , MergeableWeighted b
+                    , Traversable t) =>
                     (a -> b) -> t (Weighted a) -> b
 submergeWeighted fn = mergeWeighted . fmap (fmap fn)
 
