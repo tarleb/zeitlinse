@@ -43,6 +43,9 @@ import qualified Data.Map as M
 class MergeableWeighted a where
   mergeWeighted  :: Traversable f => f (Weighted a) -> a
 
+-- | A weight can be any real number, but will usually be in the interval [-1,1]
+newtype Weight = Weight { fromWeight :: Double }
+               deriving (Eq, Num, Fractional, Ord, Show)
 
 -- | Importance is relative and can be weighted.
 data Weighted a =
@@ -50,9 +53,6 @@ data Weighted a =
   { _weight             :: Weight
   , _unweightedItem     :: a
   } deriving (Eq, Ord, Functor, Show)
-
-newtype Weight = Weight { fromWeight :: Double }
-               deriving (Eq, Num, Fractional, Ord, Show)
 
 -- Treat weighted items like scaled vectors
 applyWeight' :: Fractional a => Weighted a -> a
