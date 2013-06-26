@@ -25,16 +25,17 @@ module ZeitLinse.Core.ZeitScore
 import ZeitLinse.Core.Types
 import ZeitLinse.Core.WeightedMerging
 
+import Control.Lens.Getter
 import Data.Time.Clock
 
 -- | Calculate the score depending on submission time and reference time.
 --   Uses simple exponential decay for now, but should be replaced with a
 --   smarter algorithm.
-zeitScore :: TimedScore -> UTCTime -> Score
-zeitScore timedScore referenceTime =
-    applyWeight (weightFromTimes (fromSubmissionTime . _time $ timedScore)
+zeitScore :: TimedRating -> UTCTime -> Score
+zeitScore timedRating referenceTime =
+    applyWeight (weightFromTimes (timedRating^.timedRatingTime.fromSubmissionTime)
                                  referenceTime)
-                (_score timedScore)
+                (timedRating^.timedRatingScore)
     where
       weightFromTimes a b = Weight . (exp . negate) . asFloating $ diffUTCTime a b
       asFloating = fromRational . toRational

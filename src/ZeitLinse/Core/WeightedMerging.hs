@@ -77,20 +77,20 @@ instance MergeableWeighted Score where
 instance MergeableWeighted SubmissionTime where
   mergeWeighted = minimum . fmap _unweightedItem
 
-instance MergeableWeighted TimedScore where
+instance MergeableWeighted TimedRating where
   -- we merge time and scores independently for now.
-  mergeWeighted rs = TimedScore (mergeScores rs) (mergeTime rs)
+  mergeWeighted rs = TimedRating (mergeScores rs) (mergeTime rs)
     where
-      mergeScores = submergeWeighted _score
-      mergeTime   = submergeWeighted _time
+      mergeScores = submergeWeighted _timedRatingScore
+      mergeTime   = submergeWeighted _timedRatingTime
 
 instance MergeableWeighted (TimeSpot a) where
   -- just take the item with the highest weight and merge the scores into a
   -- new score.
-  mergeWeighted ts = TimeSpot mergedScore bestFocalItem
+  mergeWeighted ts = TimeSpot mergedRating bestFocalItem
     where
-      bestFocalItem = submergeWeighted _focalItem  ts
-      mergedScore   = submergeWeighted _timedScore ts
+      bestFocalItem = submergeWeighted _timeSpotFocus  ts
+      mergedRating  = submergeWeighted _timeSpotRating ts
 
 instance MergeableWeighted b where
   mergeWeighted = _unweightedItem . maximumBy (compare `on` _weight)
@@ -109,5 +109,5 @@ groupTimeSpots :: (Foldable f, Ord a) =>
                   f (Weighted (TimeSpot a)) -> [[Weighted (TimeSpot a)]]
 groupTimeSpots = M.elems . foldr step M.empty
   where step a b = M.insertWith (++) (key a) [a] b
-        key = _focalItem . _unweightedItem
+        key = _timeSpotFocus . _unweightedItem
 

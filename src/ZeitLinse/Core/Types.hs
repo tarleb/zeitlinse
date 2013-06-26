@@ -18,13 +18,11 @@
 
 {-# Language DeriveFunctor #-}
 {-# Language GeneralizedNewtypeDeriving #-}
-module ZeitLinse.Core.Types
-       ( Score(..)
-       , SubmissionTime(..)
-       , TimedScore(..)
-       , TimeSpot(..)
-       ) where
+{-# Language TemplateHaskell #-}
+module ZeitLinse.Core.Types where
 
+import Control.Lens
+import Data.Function (on)
 import Data.Time.Clock
 import Data.Time.LocalTime()
 import Data.Time.Format
@@ -33,25 +31,30 @@ import Data.Time.Format
 -- high other sources rank the item.
 
 -- | Score on the importance of an entry.
-newtype Score = Score { fromScore   :: Double }
+newtype Score = Score { _fromScore   :: Double }
               deriving (Eq, Floating, Fractional, Num, Ord, Show)
 
 -- | The time at wich an entry was submitted.
-newtype SubmissionTime = SubmissionTime { fromSubmissionTime :: UTCTime }
+newtype SubmissionTime = SubmissionTime { _fromSubmissionTime :: UTCTime }
                        deriving (Eq, Ord, Read, ParseTime, FormatTime, Show)
 
 -- | A timedScore is a score and the time at which the score was given.
-data TimedScore = TimedScore
-  { _score      :: Score
-  , _time       :: SubmissionTime
+data TimedRating = TimedRating
+  { _timedRatingScore      :: Score
+  , _timedRatingTime       :: SubmissionTime
   } deriving (Eq, Show)
 
-instance Ord TimedScore where
+instance Ord TimedRating where
   -- FIXME: Should include the time of submission
-  a `compare` b = (_score a) `compare` (_score b)
+  compare = compare `on` _timedRatingScore
 
 -- | A (possibly time dependent) timedScore of an item is a TimeSpot
 data TimeSpot a = TimeSpot
-  { _timedScore :: TimedScore
-  , _focalItem  :: a
+  { _timeSpotRating :: TimedRating
+  , _timeSpotFocus  :: a
   } deriving (Eq, Functor, Show)
+
+makeLenses ''Score
+makeLenses ''SubmissionTime
+makeLenses ''TimedRating
+makeLenses ''TimeSpot

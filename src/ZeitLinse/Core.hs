@@ -19,9 +19,15 @@
 -- | Iteresting items we which we want to focus on.
 module ZeitLinse.Core
        ( Score(..)
+       , fromScore
        , SubmissionTime(..)
-       , TimedScore(..)
+       , fromSubmissionTime
+       , TimedRating(..)
+       , timedRatingScore
+       , timedRatingTime
        , TimeSpot(..)
+       , timeSpotRating
+       , timeSpotFocus
        , Weighted(..)
        , groupTimeSpots
        , mergeWeighted

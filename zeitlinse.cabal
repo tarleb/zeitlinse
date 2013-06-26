@@ -36,6 +36,7 @@ library
 
   build-depends:        base            >= 4.5 && < 5,
                         containers      >= 0.4 && < 0.6,
+                        lens            >= 3.9 && < 4,
                         time            >= 1.4 && < 2
 
 test-suite zeitlinse-tests
@@ -52,4 +53,5 @@ test-suite zeitlinse-tests
                         -- copy pasted from library dependencies
                         base            >= 4.5 && < 5,
                         containers      >= 0.4 && < 0.6,
+                        lens            >= 3.9 && < 4,
                         time            >= 1.4 && < 2

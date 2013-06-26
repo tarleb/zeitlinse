@@ -26,6 +26,7 @@ import Test.QuickCheck
 import ZeitLinse.Core
 
 import Control.Applicative ((<$>), (<*>))
+import Control.Lens.Getter
 import Data.Foldable (toList)
 import Data.Time.Clock
 import Data.Time.Calendar
@@ -38,7 +39,7 @@ tests = do
       mergeWeighted (constWeights 1 sampleScores) `shouldApproxEq` (Score 0.53)
 
     it "merges an empty list of scores to nan" $
-      mergeWeighted ([] :: [Weighted Score]) `shouldSatisfy` isNaN . fromScore
+      mergeWeighted ([] :: [Weighted Score]) `shouldSatisfy` (isNaN . (^.fromScore))
 
   describe "group TimeSpots" $ do
     it "groups TimeSpots with the same focus items into a single group" $
@@ -47,7 +48,7 @@ tests = do
     it "groups TimeSpots with different focus items into different groups" $
       groupTimeSpots [ Weighted 0.8 sampleTimeSpot
                      , Weighted 0.7 sampleTimeSpot
-                     , Weighted 0.5 sampleTimeSpot { _focalItem = "Moin" } ]
+                     , Weighted 0.5 sampleTimeSpot { _timeSpotFocus = "Moin" } ]
       `shouldSatisfy` ((== 2) . length . toList)
   describe "zeitScore" $ do
     it "gives decreasing scores over time" $
@@ -55,7 +56,7 @@ tests = do
 
 
   where
-    sampleTimedScore = TimedScore 0.5 . SubmissionTime . read $
+    sampleTimedScore = TimedRating 0.5 . SubmissionTime . read $
                        "2013-08-03 12:00:00 UTC"
     sampleTimeSpot = TimeSpot sampleTimedScore "Hello"
     equalTimeSpots = take 3 . repeat $ (Weighted 0.5 sampleTimeSpot)
@@ -87,9 +88,9 @@ instance Arbitrary UTCTime where
 instance Arbitrary NominalDiffTime where
     arbitrary = (fromRational . toRational) <$> (arbitrary :: Gen Double)
 
-prop_zeitScore_decreases_with_time :: TimedScore -> NominalDiffTime -> Property
-prop_zeitScore_decreases_with_time timedScore time =
-    time >= 0 ==>
-         zeitScore timedScore afterSubmissionUTCTime <= (_score timedScore)
-    where submissionUTCTime = fromSubmissionTime . _time $ timedScore
-          afterSubmissionUTCTime = time `addUTCTime` submissionUTCTime
+prop_zeitScore_decreases_with_time :: TimedRating -> NominalDiffTime -> Property
+prop_zeitScore_decreases_with_time timeScore refTime =
+    refTime >= 0 ==>
+         zeitScore timeScore afterSubmissionUTCTime <= (timeScore^.timedRatingScore)
+    where submissionUTCTime = timeScore ^. timedRatingTime.fromSubmissionTime
+          afterSubmissionUTCTime = refTime `addUTCTime` submissionUTCTime
