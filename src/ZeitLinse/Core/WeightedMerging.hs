@@ -16,11 +16,14 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with ZeitLinse.  If not, see <http://www.gnu.org/licenses/>.
 
+{-# Language DeriveFoldable #-}
 {-# Language DeriveFunctor #-}
+{-# Language DeriveTraversable #-}
 {-# Language ExistentialQuantification #-}
 {-# Language FlexibleInstances #-}
 {-# Language GeneralizedNewtypeDeriving #-}
 {-# Language OverlappingInstances #-}
+{-# Language TemplateHaskell #-}
 
 module ZeitLinse.Core.WeightedMerging
        (
@@ -34,6 +37,7 @@ module ZeitLinse.Core.WeightedMerging
 import ZeitLinse.Core.Types
 
 import Prelude hiding (minimum, foldr)
+import Control.Lens
 import Data.Foldable
 import Data.Function (on)
 import Data.Traversable
@@ -52,7 +56,9 @@ data Weighted a =
   Weighted
   { _weight             :: Weight
   , _unweightedItem     :: a
-  } deriving (Eq, Ord, Functor, Show)
+  } deriving (Eq, Ord, Functor, Show, Foldable, Traversable)
+
+makeLenses ''Weighted
 
 -- Treat weighted items like scaled vectors
 applyWeight' :: Fractional a => Weighted a -> a
@@ -110,4 +116,3 @@ groupTimeSpots :: (Foldable f, Ord a) =>
 groupTimeSpots = M.elems . foldr step M.empty
   where step a b = M.insertWith (++) (key a) [a] b
         key = _timeSpotFocus . _unweightedItem
-

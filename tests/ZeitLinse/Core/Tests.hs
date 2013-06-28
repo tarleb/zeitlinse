@@ -27,6 +27,7 @@ import ZeitLinse.Core
 
 import Control.Applicative ((<$>), (<*>))
 import Control.Lens.Getter
+import Control.Lens.Setter
 import Data.Foldable (toList)
 import Data.Time.Clock
 import Data.Time.Calendar
@@ -36,32 +37,33 @@ tests :: Spec
 tests = do
   describe "mergeWeighted" $ do
     it "merges scores to their mean" $
-      mergeWeighted (constWeights 1 sampleScores) `shouldApproxEq` (Score 0.53)
+       let sampleScores   = map Score [ 0.23, 0.9, 0.42, 0.63, 0, 1 ]
+           constWeights c = map (Weighted c)
+       in mergeWeighted (constWeights 1 sampleScores) `shouldApproxEq` (Score 0.53)
 
     it "merges an empty list of scores to nan" $
-      mergeWeighted ([] :: [Weighted Score]) `shouldSatisfy` (isNaN . (^.fromScore))
+       let emptyList = [] :: [Weighted Score]
+       in mergeWeighted emptyList `shouldSatisfy` isNaN . (^.fromScore)
 
   describe "group TimeSpots" $ do
     it "groups TimeSpots with the same focus items into a single group" $
-      groupTimeSpots equalTimeSpots `shouldSatisfy` ((== 1) . length . toList)
+       let eqlTimeSpots = take 3 . repeat $ (Weighted 0.5 sampleTimeSpot)
+       in groupTimeSpots eqlTimeSpots `shouldSatisfy` ((== 1) . length . toList)
 
     it "groups TimeSpots with different focus items into different groups" $
       groupTimeSpots [ Weighted 0.8 sampleTimeSpot
                      , Weighted 0.7 sampleTimeSpot
-                     , Weighted 0.5 sampleTimeSpot { _timeSpotFocus = "Moin" } ]
+                     , Weighted 0.5 (set timeSpotFocus "Moin" sampleTimeSpot) ]
       `shouldSatisfy` ((== 2) . length . toList)
+
   describe "zeitScore" $ do
     it "gives decreasing scores over time" $
       quickCheck (prop_zeitScore_decreases_with_time sampleTimedScore)
-
 
   where
     sampleTimedScore = TimedRating 0.5 . SubmissionTime . read $
                        "2013-08-03 12:00:00 UTC"
     sampleTimeSpot = TimeSpot sampleTimedScore "Hello"
-    equalTimeSpots = take 3 . repeat $ (Weighted 0.5 sampleTimeSpot)
-    sampleScores = map Score [ 0.23, 0.9, 0.42, 0.63, 0, 1 ]
-    constWeights c = map (Weighted c)
 
 --
 -- Utilities
@@ -92,5 +94,5 @@ prop_zeitScore_decreases_with_time :: TimedRating -> NominalDiffTime -> Property
 prop_zeitScore_decreases_with_time timeScore refTime =
     refTime >= 0 ==>
          zeitScore timeScore afterSubmissionUTCTime <= (timeScore^.timedRatingScore)
-    where submissionUTCTime = timeScore ^. timedRatingTime.fromSubmissionTime
+    where submissionUTCTime = timeScore^.timedRatingTime.fromSubmissionTime
           afterSubmissionUTCTime = refTime `addUTCTime` submissionUTCTime
