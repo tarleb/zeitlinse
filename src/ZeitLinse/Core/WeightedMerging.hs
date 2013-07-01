@@ -115,4 +115,4 @@ groupTimeSpots :: (Foldable f, Ord a) =>
                   f (Weighted (TimeSpot a)) -> [[Weighted (TimeSpot a)]]
 groupTimeSpots = M.elems . foldr step M.empty
   where step a b = M.insertWith (++) (key a) [a] b
-        key = _timeSpotFocus . _unweightedItem
+        key = (^.unweightedItem.timeSpotFocus)

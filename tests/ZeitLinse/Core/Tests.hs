@@ -1,4 +1,5 @@
 -- ZeitLinse, time dependent rating of information sources
+--
 -- Copyright (C) 2013 Albert Krewinkel <tarleb@moltkeplatz.de>
 --
 -- This file is part of ZeitLinse.
@@ -37,7 +38,7 @@ tests :: Spec
 tests = do
   describe "mergeWeighted" $ do
     it "merges scores to their mean" $
-       let sampleScores   = map Score [ 0.23, 0.9, 0.42, 0.63, 0, 1 ]
+       let sampleScores   = [ 0.23, 0.9, 0.42, 0.63, 0, 1 ] :: [Score]
            constWeights c = map (Weighted c)
        in mergeWeighted (constWeights 1 sampleScores) `shouldApproxEq` (Score 0.53)
 
