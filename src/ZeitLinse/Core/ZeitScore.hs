@@ -20,6 +20,7 @@
 -- | Time dependent scores.
 module ZeitLinse.Core.ZeitScore
        ( zeitScore
+       , zeitScore'
        ) where
 
 import ZeitLinse.Core.Types
@@ -32,10 +33,15 @@ import Data.Time.Clock
 --   Uses simple exponential decay for now, but should be replaced with a
 --   smarter algorithm.
 zeitScore :: TimedRating -> UTCTime -> Score
-zeitScore timedRating referenceTime =
-    applyWeight (weightFromTimes (timedRating^.timedRatingTime.fromSubmissionTime)
-                                 referenceTime)
-                (timedRating^.timedRatingScore)
+zeitScore = zeitScore' $ exp . negate
+
+-- | Like zeitScore, but takes an activation function as additional parameter.
+zeitScore' :: (Double -> Double) -> TimedRating -> UTCTime -> Score
+zeitScore' fn timedRating referenceTime =
+    applyWeight weightFromTimes $ timedRating^.timedRatingScore
     where
-      weightFromTimes a b = Weight . (exp . negate) . asFloating $ diffUTCTime a b
-      asFloating = fromRational . toRational
+      weightFromTimes = Weight . fn . asFloating $ timePassed
+      timePassed      = diffUTCTime submissionTime referenceTime
+      submissionTime  = timedRating ^. timedRatingTime.fromSubmissionTime
+      asFloating      = fromRational . toRational
+

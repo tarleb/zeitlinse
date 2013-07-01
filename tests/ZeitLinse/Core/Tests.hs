@@ -58,12 +58,16 @@ tests = do
 
   describe "zeitScore" $ do
     it "gives decreasing scores over time" $
-      quickCheck (prop_zeitScore_decreases_with_time sampleTimedScore)
+      quickCheck (prop_zeitScore_decreases_with_time sampleTimedRating)
+
+    it "gives the original score at the time of submission" $
+       zeitScore sampleTimedRating sampleTime `shouldApproxEq`
+                     (sampleTimedRating^.timedRatingScore)
 
   where
-    sampleTimedScore = TimedRating 0.5 . SubmissionTime . read $
-                       "2013-08-03 12:00:00 UTC"
-    sampleTimeSpot = TimeSpot sampleTimedScore "Hello"
+    sampleTime        = (read "2013-08-03 12:00:00 UTC") :: UTCTime
+    sampleTimedRating = TimedRating 0.5 . SubmissionTime $ sampleTime
+    sampleTimeSpot    = TimeSpot sampleTimedRating "Hello"
 
 --
 -- Utilities
